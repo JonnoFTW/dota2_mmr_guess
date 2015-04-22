@@ -7,9 +7,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <title>MMR Guesser</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 
     <!-- Bootstrap -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
     <style type="text/css">
 .glyphicon-refresh-animate {
     -animation: spin .7s infinite linear;
@@ -24,6 +26,10 @@
 @keyframes spin {
     from { transform: scale(1) rotate(0deg);}
     to { transform: scale(1) rotate(360deg);}
+}
+.bs-example{
+	margin: 20px;
+	padding-top:10px;
 }
     </style>
   </head>
@@ -40,14 +46,19 @@
 		</table><hr>
 		<form id="submit-form">
 		  <div class="form-group">
-		  	<label class="control-label">SteamId 64 (should look like: 76561198036657880)</label>
-		    <input type="number" min="0" class="form-control" id="sauce" placeholder="Steam ID"></input>
+		  	<label class="control-label">Dotabuff ID</label>
+		    <input type="number" min="0" class="form-control" id="sauce" placeholder="Dotabuff ID"></input>
 		  </div>
 
 		  <button type="submit" id="submit-button" class="btn btn-primary btn-lg btn-block"><span class="glyphicon glyphicon-refresh glyphicon-refresh-animate" style="display: none" id="loading-icon"></span> <span id="button-txt">Submit</span></button>
-		<p class="bg-danger" style="display:none" id="ajax-error"></p>
+
+<div class="bs-example" id="ajax-error" style="display:none">
+    <div class="alert alert-danger alert-error">
+        <a href="#" class="close" data-dismiss="alert">&times;</a>
+        <strong>Error</strong> <span id="ajax-text-error">This is where an error would go, if you had one.</span>
+    </div>
+</div>
 		</form>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 	<script type="text/javascript">
 		String.prototype.contains = function(it) { return this.indexOf(it) != -1; };
 		function parseDotaBuff(id) {
@@ -55,15 +66,20 @@
 			$('#ajax-error').hide();
 			$("#button-txt").text('Loading');
                         $.getJSON("dota2_ajax.php",{'id':id},function(data){
-				if(data['error'])
+				if(data['error']) {
 					// print an error
-					$('#ajax-error').show().text(data['error']);
-				else  {
+					$('#ajax-error').show();
+					$('#ajax-text-error').text(data['error']);
+				} else  {
 					$("#mmr").text(data['current-mmr']);
 					$("#skill-bracket").text(data['skill-bracket']);
 					$("#most-matches").text(data['most-matches']);
 					$("#total-matches").text(data['total-matches']);
 				}
+			}).fail(function(xhr,status,error){
+				$('#ajax-error').show();
+				$('#ajax-text-error').text(error);
+			}).always(function(){
 				$('#loading-icon').hide();
 				$("#button-txt").text("Submit");
 			});
